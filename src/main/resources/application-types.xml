@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="cryptocurrencies_json" format="json">
+      <types:shape format="weave" example="examples/cryptocurrencies_json.json"><![CDATA[%dw 2.0
+
+type cryptocurrencies_json = {|
+  status: String, 
+  data: {|
+    stats: {|
+      total: Number {"typeId": "int"}, 
+      offset: Number {"typeId": "int"}, 
+      limit: Number {"typeId": "int"}, 
+      order: String, 
+      base: String, 
+      totalMarkets: Number {"typeId": "int"}, 
+      totalExchanges: Number {"typeId": "int"}, 
+      totalMarketCap: Number {"typeId": "double"}, 
+      total24hVolume: Number {"typeId": "double"}
+    |}, 
+    base: {|
+      symbol: String, 
+      sign: String
+    |}, 
+    coins: Array<{|      id: Number {"typeId": "int"},       uuid: String,       slug: String,       symbol: String,       name: String,       description: String,       color: String,       iconType: String,       iconUrl: String,       websiteUrl: String,       socials: Array<{|        name: String,         url: String,         "type": String      |}>, 
+      links: Array<{|        name: String,         "type": String,         url: String      |}>, 
+      confirmedSupply: Boolean, 
+      numberOfMarkets: Number {"typeId": "int"}, 
+      numberOfExchanges: Number {"typeId": "int"}, 
+      "type": String, 
+      volume: Number {"typeId": "double"}, 
+      marketCap: Number {"typeId": "double"}, 
+      price: String, 
+      circulatingSupply: Number {"typeId": "int"}, 
+      totalSupply: Number {"typeId": "int"}, 
+      approvedSupply: Boolean, 
+      firstSeen: Number {"typeId": "double"}, 
+      listedAt: Number {"typeId": "int"}, 
+      change: Number {"typeId": "double"}, 
+      rank: Number {"typeId": "int"}, 
+      history: Array<String>, 
+      allTimeHigh: {|
+        price: String, 
+        timestamp: Number {"typeId": "double"}
+      |}, 
+      penalty: Boolean
+    |}>
+  |}
+|} {"example": "{\\\"status\\\":\\\"success\\\",\\\"data\\\":{\\\"stats\\\":{\\\"total\\\":12426,\\\"offset\\\":0,\\\"limit\\\":50,\\\"order\\\":\\\"desc\\\",\\\"base\\\":\\\"USD\\\",\\\"totalMarkets\\\":81830,\\\"totalExchanges\\\":373,\\\"totalMarketCap\\\":2719467412818.035,\\\"total24hVolume\\\":152583209015.914},\\\"base\\\":{\\\"symbol\\\":\\\"USD\\\",\\\"sign\\\":\\\"\$\\\"},\\\"coins\\\":[{\\\"id\\\":1,\\\"uuid\\\":\\\"Qwsogvtv82FCd\\\",\\\"slug\\\":\\\"bitcoin-btc\\\",\\\"symbol\\\":\\\"BTC\\\",\\\"name\\\":\\\"Bitcoin\\\",\\\"description\\\":\\\"<p>Bitcoin is the first digital currency that allows users to send and receive money, without the interference of a central bank or government. Instead, a network of thousands of peers is controlling the transactions; a decentralized system.<\\/p>\\\\n\\\\n<h3>Why does bitcoin have value?<\\/h3>\\\\n\\\\n<p>Bitcoin&rsquo;s useful qualities (decentralized, borderless, secure) aren&rsquo;t the only reason the coin is worth so much. Due to its scarcity (and it&rsquo;s hard to produce), Bitcoin is often nicknamed &lsquo;Digital Gold&rsquo;, in reference to &lsquo;classic&rsquo; physical gold. Like gold, Bitcoin also has a finite supply of coins available; there will only ever be 21 million bitcoin. And now you know why the creation of new bitcoins is also called mining.<\\/p>\\\\n\\\\n<h3>No inflation in bitcoin<\\/h3>\\\\n\\\\n<p>Bitcoin was invented in response to a few concerns the inventor(s) had, such as inflation. Its supply is limited, so one cannot just devalue the currency by printing more, as governments often do with fiat currencies (USD, EUR, etc.).<\\/p>\\\\n\\\\n<p>As people look for alternative places to keep their money rather than losing value in a negative interest rate account, Bitcoin becomes more appealing. Big global companies, such as Tesla and MicroStrategy already purchased serious amounts of Bitcoin. And it&#39;s only a matter of time that other companies will follow. This also ensures that the value remains or continues to increase.<\\/p>\\\\n\\\\n<h3>Who built Bitcoin<\\/h3>\\\\n\\\\n<p>In 2008, Bitcoin was invented by an anonymous person or group named Satoshi Nakamoto. In 2009, Bitcoin was released as open-source software. Nakamoto&rsquo;s real identity is still unknown, although there are many theories about who it might be. Decentralization is one of Bitcoin&rsquo;s most important principles, and that&rsquo;s why this anonymity is perfectly in line.<\\/p>\\\\n\\\\n<h3>The technology of Bitcoin<\\/h3>\\\\n\\\\n<p>The Bitcoin blockchain is a database, the so-called &lsquo;ledger&rsquo;, that consists of bitcoin transaction records. For new transactions to be added to the ledger, the nodes must agree that the transaction is real and valid. The blockchain is public and contains records of all the transactions taking place.<\\/p>\\\\n\\\\n<h3>How to buy bitcoin?<\\/h3>\\\\n\\\\n<p>Continue reading <a href=\\\\\\\"https:\\/\\/coinranking.com\\/blog\\/how-to-buy-your-first-bitcoin\\/\\\\\\\" rel=\\\\\\\"nofollow noopener\\\\\\\" target=\\\\\\\"_blank\\\\\\\">this blog article<\\/a> on how to buy your first bitcoin.<\\/p>\\\\n\\\",\\\"color\\\":\\\"#f7931A\\\",\\\"iconType\\\":\\\"pixel\\\",\\\"iconUrl\\\":\\\"https:\\/\\/cdn.coinranking.com\\/cxGyb7wNo\\/Insta_pumpkin.png\\\",\\\"websiteUrl\\\":\\\"https:\\/\\/bitcoin.org\\\",\\\"socials\\\":[{\\\"name\\\":\\\"r\\/bitcoin\\\",\\\"url\\\":\\\"https:\\/\\/www.reddit.com\\/r\\/bitcoin\\/\\\",\\\"type\\\":\\\"reddit\\\"},{\\\"name\\\":\\\"bitcoin\\/bitcoin\\\",\\\"url\\\":\\\"https:\\/\\/github.com\\/bitcoin\\/bitcoin\\\",\\\"type\\\":\\\"github\\\"}],\\\"links\\\":[{\\\"name\\\":\\\"bitcoin.org\\\",\\\"type\\\":\\\"website\\\",\\\"url\\\":\\\"https:\\/\\/bitcoin.org\\\"},{\\\"name\\\":\\\"Bitcoin Whitepaper\\\",\\\"url\\\":\\\"https:\\/\\/bitcoin.org\\/bitcoin.pdf\\\",\\\"type\\\":\\\"website\\\"},{\\\"name\\\":\\\"bitcoinmagazine.com\\\",\\\"url\\\":\\\"https:\\/\\/bitcoinmagazine.com\\/\\\",\\\"type\\\":\\\"website\\\"},{\\\"name\\\":\\\"BitcoinTalk\\\",\\\"url\\\":\\\"https:\\/\\/bitcointalk.org\\/\\\",\\\"type\\\":\\\"bitcointalk\\\"},{\\\"name\\\":\\\"blockchain.com\\\",\\\"url\\\":\\\"https:\\/\\/www.blockchain.com\\/explorer\\\",\\\"type\\\":\\\"explorer\\\"},{\\\"name\\\":\\\"bitcoin\\/bitcoin\\\",\\\"url\\\":\\\"https:\\/\\/github.com\\/bitcoin\\/bitcoin\\\",\\\"type\\\":\\\"github\\\"},{\\\"name\\\":\\\"r\\/bitcoin\\\",\\\"url\\\":\\\"https:\\/\\/www.reddit.com\\/r\\/bitcoin\\/\\\",\\\"type\\\":\\\"reddit\\\"},{\\\"name\\\":\\\"Bitcoin_Magazine\\\",\\\"url\\\":\\\"https:\\/\\/t.me\\/Bitcoin_Magazine\\\",\\\"type\\\":\\\"telegram\\\"},{\\\"name\\\":\\\"bitcoin\\\",\\\"url\\\":\\\"https:\\/\\/t.me\\/bitcoin\\\",\\\"type\\\":\\\"telegram\\\"}],\\\"confirmedSupply\\\":true,\\\"numberOfMarkets\\\":21734,\\\"numberOfExchanges\\\":346,\\\"type\\\":\\\"coin\\\",\\\"volume\\\":30375543634,\\\"marketCap\\\":1145399838354,\\\"price\\\":\\\"60731.5377400178\\\",\\\"circulatingSupply\\\":18860056,\\\"totalSupply\\\":18860056,\\\"approvedSupply\\\":true,\\\"firstSeen\\\":1330214400000,\\\"listedAt\\\":1330214400,\\\"change\\\":-1.29,\\\"rank\\\":1,\\\"history\\\":[\\\"61523.2933385118\\\",\\\"61574.6610111586\\\",\\\"61781.4923137505\\\",\\\"61677.0770521727\\\",\\\"61505.1860543311\\\",\\\"61579.923457288\\\",\\\"62002.1543963913\\\",\\\"62306.2991411827\\\",\\\"62177.6646387618\\\",\\\"61914.922539522\\\",\\\"61709.0300015011\\\",\\\"61498.6536214044\\\",\\\"61335.5066948346\\\",\\\"61289.9062105844\\\",\\\"61323.2891212465\\\",\\\"60942.5364544069\\\",\\\"60713.896431673\\\",\\\"60821.2389770814\\\",\\\"60619.6415477308\\\",\\\"60486.7050469038\\\",\\\"60429.4076200957\\\",\\\"60477.1425055996\\\",\\\"60593.8781891414\\\",\\\"60549.8148910079\\\",\\\"60759.8030146696\\\",\\\"60656.6706442433\\\",\\\"60731.5377400178\\\"],\\\"allTimeHigh\\\":{\\\"price\\\":\\\"65970.3834821493\\\",\\\"timestamp\\\":1634774400000},\\\"penalty\\\":false}]}}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="cryptocurrencies_from_queue_json" format="json">
+      <types:shape format="weave" example="examples/cryptocurrencies_from_queue-1.json"><![CDATA[%dw 2.0
+
+type cryptocurrencies_from_queue_json = {|
+  date: String, 
+  cryptocurrencies: Array<{|    id: Number {"typeId": "int"},     symbol: String,     name: String,     image: String,     website: String,     price: String  |}>
+|} {"example": "{\\\"date\\\":\\\"2021-11-01 12-30-18\\\",\\\"cryptocurrencies\\\":[{\\\"id\\\":1,\\\"symbol\\\":\\\"BTC\\\",\\\"name\\\":\\\"Bitcoin\\\",\\\"image\\\":\\\"https:\\/\\/cdn.coinranking.com\\/bOabBYkcX\\/bitcoin_btc.svg\\\",\\\"website\\\":\\\"https:\\/\\/bitcoin.org\\\",\\\"price\\\":\\\"60731.5377400178\\\"}]}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#999e93a1-5db1-4616-8a9d-a2e28a6059a8">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="cryptocurrencies_from_queue_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#808b4a1c-042c-4a82-97f5-4c9672318b9f">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="cryptocurrencies_from_queue_json"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#65a7a3c4-c28f-4634-a57b-ec63d8790433">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="cryptocurrencies_json"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#500b0502-44f3-4706-9014-f10238f7f883">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="cryptocurrencies_from_queue_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#fc582170-89be-46c3-8f44-5c03684511ac">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="cryptocurrencies_from_queue_json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

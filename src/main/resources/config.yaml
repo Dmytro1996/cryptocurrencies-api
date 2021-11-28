@@ -1,0 +1,22 @@
+http:
+  port: "8081"
+
+cryptoranking:
+  host: coinranking1.p.rapidapi.com
+  port: "443"
+  
+amqp:
+  host: "localhost"
+  port: "5672"
+  username: "Dmytro"
+  password: "![q8lREinYj9AQON6OZfw3Yg==]"
+  
+mongodb:
+  database: "cryptocurrencies_task"
+  
+smtp:
+  host: "smtp.gmail.com"
+  port: "587"
+  user: ${smtp.email}
+  password: ${smtp.password}
+  

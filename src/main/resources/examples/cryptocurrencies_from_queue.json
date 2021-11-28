@@ -1,0 +1,12 @@
+{
+  "date": "2021-11-01 12-30-18",
+  "cryptocurrencies": [
+    {
+      "id": 1,
+      "symbol": "BTC",
+      "name": "Bitcoin",
+      "website": "https://bitcoin.org",
+      "price": "60731.5377400178"
+    }
+  ]
+}

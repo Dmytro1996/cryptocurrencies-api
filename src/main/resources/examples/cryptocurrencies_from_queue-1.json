@@ -1,0 +1,13 @@
+{
+  "date": "2021-11-01 12-30-18",
+  "cryptocurrencies": [
+    {
+      "id": 1,
+      "symbol": "BTC",
+      "name": "Bitcoin",
+      "image": "https://cdn.coinranking.com/bOabBYkcX/bitcoin_btc.svg",
+      "website": "https://bitcoin.org",
+      "price": "60731.5377400178"
+    }
+  ]
+}
