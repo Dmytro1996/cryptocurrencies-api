@@ -1154,7 +1154,7 @@ import divideBy from dw::core::Arrays
     }).*coin joinBy "\n"]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<parse-template doc:name="Parse Template" doc:id="ba8accae-899f-4e65-a555-db2ca5fe5f28" location="C:\Users\ddanylo\Documents\Mulesoft\Cryptocurrency Api\index.html"/>
+		<parse-template doc:name="Parse Template" doc:id="ba8accae-899f-4e65-a555-db2ca5fe5f28" location="templates\index.html"/>
 		<logger level="INFO" doc:name="Logger" doc:id="b45c2a59-f9fb-4006-9675-5f26cb472476" message='#[output text/plain&#10;---&#10;p("smtp.user") ++ " " ++ p("smtp.password")]'/>
 		<email:send doc:name="Send" doc:id="643c93bd-4b8a-46bc-a3e4-30d7898d31f6" config-ref="Email_SMTP">
 			<email:to-addresses >
@@ -1196,6 +1196,6 @@ header=true
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<file:write doc:name="Write" doc:id="5e16f271-4b91-411b-bec5-d752552b5e42" path='#["C:\\Users\\ddanylo\\Documents\\Mulesoft\\Cryptocurrency Api\\Excel files\\" ++ "cryptocurrensies_" ++ now() as String{format:"YYYY-MM-dd hh-mm-ss"} ++ ".xlsx"]'/>
+		<file:write doc:name="Write" doc:id="5e16f271-4b91-411b-bec5-d752552b5e42" path='#["cryptocurrensies_" ++ now() as String{format:"YYYY-MM-dd hh-mm-ss"} ++ ".xlsx"]' config-ref="File_Config"/>
 	</flow>
 </mule>
