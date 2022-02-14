@@ -2,7 +2,9 @@ http:
   port: "8081"
 
 cryptoranking:
-  host: coinranking1.p.rapidapi.com
+  host: api.coinranking.com
+  version: /v2
+  #host: coinranking1.p.rapidapi.com
   port: "443"
   
 amqp:

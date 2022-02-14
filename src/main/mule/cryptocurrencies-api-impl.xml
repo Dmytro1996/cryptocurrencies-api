@@ -19,8 +19,8 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
 			<http:headers ><![CDATA[#[output application/java
 ---
 {
-	"x-rapidapi-key" : "367da360a2mshe99c6313e5c1f4dp121921jsn97b4c767bdf0",
-	"x-rapidapi-host" : "coinranking1.p.rapidapi.com"
+	//"x-rapidapi-key" : "367da360a2mshe99c6313e5c1f4dp121921jsn97b4c767bdf0",
+	//"x-rapidapi-host" : "coinranking1.p.rapidapi.com"
 }]]]></http:headers>
 		</http:request>
 		<ee:transform doc:name="Transform Message" doc:id="c92c21ef-40bb-4912-bfc3-de3ba6e9ea43">
@@ -31,11 +31,11 @@ output application/json
 {
 	date: now() as String{format:"YYYY-MM-dd HH-mm-ss"},
 	cryptocurrencies: payload.data.coins map(coin)->{
-		id: coin.id,
+		rank: coin.rank,
 		symbol: coin.symbol,
 		name: coin.name,
 		image: coin.iconUrl default "unknown",
-		website: coin.websiteUrl default "unknown",
+		url: coin.coinrankingUrl default "unknown",
 		price: coin.price
 	}
 }]]></ee:set-payload>
@@ -1135,19 +1135,19 @@ import divideBy from dw::core::Arrays
 ---
 ((payload.cryptocurrencies divideBy 3) map(coins)->{
 	coin: ("<tr>" ++ ((coins map (coin)-> do {
-	  var website=if(coin.website=="unknown")
-	  	coin.website
+	  var url=if(coin.url=="unknown")
+	  	coin.url
 	   else
-	  	"<a href=\""++ coin.website ++ "\">" ++ coin.website ++ "</a>"
+	  	"<a href=\""++ coin.url ++ "\">" ++ coin.name ++ "</a>"
 	  
       ---
       coin: "<td>\n<h2 style=\"margin:0;padding-left:20px;\">" ++ 
         "<img src=\"" ++ coin.image ++ "\" width=\"20\" height=\"20\"/>"
-        ++ coin.name ++ "</h2>\n<h3 style=\"padding-left: 30px;font-size:1em;\">id:"
-        ++ coin.id ++ "</h3>\n<h3 style=\"padding-left: 30px;font-size:1em;\">symbol:"
+        ++ coin.name ++ "</h2>\n<h3 style=\"padding-left: 30px;font-size:1em;\">Rank:"
+        ++ coin.rank ++ "</h3>\n<h3 style=\"padding-left: 30px;font-size:1em;\">symbol:"
         ++ coin.symbol
-        ++ "</h3>\n<h3 style=\"padding-left: 30px;font-size:1em;display:table-caption\">website:"
-        ++ website 
+        ++ "</h3>\n<h3 style=\"padding-left: 30px;font-size:1em;display:table-caption\">url:"
+        ++ url 
         ++ "</h3>\n<h3 style=\"padding-left: 30px;font-size:1em;\">  price:"
         ++ coin.price ++ "</h3>\n</td>"
         }).*coin joinBy "\n") ++ "</tr>")        

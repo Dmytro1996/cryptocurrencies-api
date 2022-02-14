@@ -12,7 +12,7 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="9263238c-5a74-4e3e-9746-23827152c8da" >
 		<http:listener-connection host="0.0.0.0" port="${http.port}" />
 	</http:listener-config>
-	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="d1ea6557-5f8c-4633-ad2b-5f1ba7e4fa84" >
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="d1ea6557-5f8c-4633-ad2b-5f1ba7e4fa84" basePath="${cryptoranking.version}">
 		<http:request-connection protocol="HTTPS" host="${cryptoranking.host}" port="${cryptoranking.port}" />
 	</http:request-config>
 	<configuration-properties doc:name="Configuration properties" doc:id="19b2c89f-980c-4f22-8ac5-77c6922467e9" file="config.yaml" />
