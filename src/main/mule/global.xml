@@ -39,4 +39,10 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
 	<file:config name="File_Config" doc:name="File Config" doc:id="60428c42-cba5-4a5d-8be0-798d61866d42" >
 		<file:connection workingDir="C:\Users\ddanylo\AnypointStudio\studio-workspace\cryptocurrencies-api\src\main\resources\cryptocurrencies-excel" />
 	</file:config>
+	<http:request-config name="HTTP_Viber_Request_configuration" doc:name="HTTP Request configuration" doc:id="81967f38-0683-4b7e-9d3a-57ac4645d051" basePath="${viber_request.basePath}" >
+		<http:request-connection protocol="HTTPS" host="${viber_request.host}" port="${viber_request.port}" />
+	</http:request-config>
+	<http:request-config name="HTTP_Telegram_Request_configuration" doc:name="HTTP Request configuration" doc:id="d34837d3-bff9-4656-ab0e-efce41a1f313" basePath="${telegram_request.basePath}${telegram_request.token}" >
+		<http:request-connection host="${telegram_request.host}" port="${telegram_request.port}" protocol="HTTPS"/>
+	</http:request-config>
 </mule>

@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_e0deca6a_0ebc_4fc6_83c7_56b313c4738e_Output_Payload = Array<Number {"typeId": "int"}>
+

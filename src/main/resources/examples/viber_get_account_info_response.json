@@ -1,0 +1,34 @@
+{
+    "status": 0,
+    "status_message": "ok",
+    "id": "pa:5675143164552797808",
+    "chat_hostname": "SN-CHAT-03_",
+    "name": "Cryptocurrencies project",
+    "uri": "cryptocurrenciesproject",
+    "icon": "https://media-direct.cdn.viber.com/pg_download?pgtp=icons&dlid=0-04-01-d4be76fad1c7b7a462f42a9a5c3a83f69490613619231be383f592b2c111c935&fltp=jpg&imsz=0000",
+    "category": "Companies, Brands & Products",
+    "subcategory": "IT",
+    "location": {
+        "lat": 49.8352707,
+        "lon": 24.0236604
+    },
+    "country": "UA",
+    "webhook": "https://example.com",
+    "event_types": [
+        "subscribed",
+        "unsubscribed",
+        "conversation_started",
+        "delivered",
+        "failed",
+        "message",
+        "seen"
+    ],
+    "members": [
+        {
+            "id": "LEPYn/CZWCQYhj7Mjf2x2w==",
+            "name": "Дмитро Данилов",
+            "role": "admin"
+        }
+    ],
+    "subscribers_count": 1
+}

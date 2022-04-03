@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:email="http://www.mulesoft.org/schema/mule/email"
-	xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo"
-	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/amqp http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/current/mule-mongo.xsd
 http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
-http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
 	<flow name="publish-cryptocurrencies-Flow" doc:id="f8c39399-d444-4469-a33d-d3f4558a7ca6">
 		<scheduler doc:name="Scheduler" doc:id="03e0a944-1977-4126-891a-bde4be987e44">
 			<scheduling-strategy>
@@ -1198,4 +1199,82 @@ header=true
 		</ee:transform>
 		<file:write doc:name="Write" doc:id="5e16f271-4b91-411b-bec5-d752552b5e42" path='#["cryptocurrensies_" ++ now() as String{format:"YYYY-MM-dd hh-mm-ss"} ++ ".xlsx"]' config-ref="File_Config"/>
 	</flow>
+	<flow name="send-to-messengers-implFlow" doc:id="adb33a1d-8e0e-42e0-b7a1-ece2c6d3cc24" >
+		<amqp:listener doc:name="Listener" doc:id="406ce0d3-ba6e-481e-86e2-4180abe44795" config-ref="AMQP_Config" queueName="cryptocurrencies_viber"/>
+		<ee:transform doc:name="Transform Message" doc:id="0b23a8d5-3386-4822-913b-c89cfdb25e82" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="rates" ><![CDATA[%dw 2.0
+output text/plain
+import * from dw::core::Arrays
+---
+(payload.cryptocurrencies map(coin)->{
+	rateAsStr: coin.symbol ++ " : " ++ (coin.price as Number as String {format:"#.####"})
+}).*rateAsStr joinBy "\n"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="840686ed-9871-473e-98f9-052fed64f0f3" >
+			<route >
+				<flow-ref doc:name="Send to Viber" doc:id="dd73d14b-f627-4f97-a0a6-3d4c6c289a5a" name="send-to-viber-implSub_Flow"/>
+			</route>
+			<route >
+				<flow-ref doc:name="Send to telegram" doc:id="2736b2d5-f937-4d67-99f9-90f0ba5e62f6" name="send-to-telegram-implSub_Flow"/>
+			</route>
+		</scatter-gather>
+	</flow>
+	<sub-flow name="send-to-viber-implSub_Flow" doc:id="9f1f20a3-7c7d-4d04-a9f6-54deb1b59374" >
+		<http:request method="GET" doc:name="Get subscribers" doc:id="8ef8cff6-fd9b-47a7-979a-1c249c26dea0" config-ref="HTTP_Viber_Request_configuration" path="/get_account_info">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"X-Viber-Auth-Token" : '${viber_request.token}'
+}]]]></http:headers>
+		</http:request>
+		<foreach doc:name="For Each" doc:id="63ff4019-6ca4-4e0b-b487-0c2b6c4e35eb" collection="#[payload.members]">
+			<http:request method="POST" doc:name="Send message" doc:id="db3b3f61-e47c-4d27-88b4-de2267b162df" config-ref="HTTP_Viber_Request_configuration" path="/send_message">
+			<http:body><![CDATA[#[output application/json
+---
+{
+   "receiver": payload.id,
+   "min_api_version":1,
+   "sender":{
+      "name":"Cryptocurrencies-api",
+      "avatar":"https://content1.rozetka.com.ua/goods/images/big/109826427.jpg"
+   },
+   "tracking_data":"tracking data",
+   "type":"text",
+   "text": vars.rates
+}]]]></http:body>
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"X-Viber-Auth-Token" : '${viber_request.token}'
+}]]]></http:headers>
+		</http:request>
+		</foreach>
+	</sub-flow>
+	<sub-flow name="send-to-telegram-implSub_Flow" doc:id="e0deca6a-0ebc-4fc6-83c7-56b313c4738e" >
+		<http:request method="GET" doc:name="getUpdates" doc:id="d459c341-febd-4ef2-b7e8-5553c325e5e0" config-ref="HTTP_Telegram_Request_configuration" path="/getUpdates">
+		</http:request>
+		<ee:transform doc:name="Get unique chat ids" doc:id="a34bf9d5-02cf-401a-9cd6-d313ad334cc9">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+(payload.result distinctBy $.message.chat.id map(object)->{
+	chat_id: object.message.chat.id
+}).*chat_id]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="e9d86fe5-5a6c-40f9-8776-4e07cf610e28" collection="#[payload]">
+			<http:request method="GET" doc:name="Send message" doc:id="e9636fe5-1fed-462c-a6eb-40b617719555" config-ref="HTTP_Telegram_Request_configuration" path="/sendMessage">
+				<http:query-params><![CDATA[#[{
+	chat_id: payload as Number,
+	text: vars.rates default "Sorry, no coin rates currently" as String,
+	reply_to_message_id: 1
+}]]]></http:query-params>
+			</http:request>
+		</foreach>
+	</sub-flow>
 </mule>

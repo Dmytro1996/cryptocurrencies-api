@@ -19,6 +19,18 @@ mongodb:
 smtp:
   host: "smtp.gmail.com"
   port: "587"
-  user: ${smtp.email}
-  password: ${smtp.password}
+  user: "your@mail.com"
+  password: "your_pass"
+  
+viber_request:
+  host: "chatapi.viber.com"
+  basePath: "/pa"
+  port: "443"
+  token: "your_viber_token"
+
+telegram_request:
+  host: "api.telegram.org"
+  port: "443"
+  basePath: "/bot"
+  token: "your_telegram_token"
   

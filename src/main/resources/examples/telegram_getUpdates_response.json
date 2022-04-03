@@ -1,0 +1,61 @@
+{
+    "ok": true,
+    "result": [
+        {
+            "update_id": 539616491,
+            "message": {
+                "message_id": 3,
+                "from": {
+                    "id": 753535033,
+                    "is_bot": false,
+                    "first_name": "Дмитро",
+                    "last_name": "Данилов",
+                    "language_code": "uk"
+                },
+                "chat": {
+                    "id": 753535033,
+                    "first_name": "Дмитро",
+                    "last_name": "Данилов",
+                    "type": "private"
+                },
+                "date": 1648904183,
+                "text": "/get_coins",
+                "entities": [
+                    {
+                        "offset": 0,
+                        "length": 10,
+                        "type": "bot_command"
+                    }
+                ]
+            }
+        },
+        {
+            "update_id": 539616492,
+            "message": {
+                "message_id": 4,
+                "from": {
+                    "id": 753535033,
+                    "is_bot": false,
+                    "first_name": "Дмитро",
+                    "last_name": "Данилов",
+                    "language_code": "uk"
+                },
+                "chat": {
+                    "id": 753535033,
+                    "first_name": "Дмитро",
+                    "last_name": "Данилов",
+                    "type": "private"
+                },
+                "date": 1648904227,
+                "text": "/get_coins",
+                "entities": [
+                    {
+                        "offset": 0,
+                        "length": 10,
+                        "type": "bot_command"
+                    }
+                ]
+            }
+        }
+    ]
+}
