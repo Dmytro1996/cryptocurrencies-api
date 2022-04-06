@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:mongo="http://www.mulesoft.org/schema/mule/mongo"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mongo/current/mule-mongo.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="get-recent-coin-prices-Sub_Flow" doc:id="13fc3d64-47a8-4da3-9d7e-a1c840ae41b7" >
+		<mongo:find-documents collectionName="Cryptocurrencies_recent" doc:name="Find documents" doc:id="565b270c-d455-456f-a741-af05265f3f11" config-ref="MongoDB_Config" fields="#[{}]"/>
+		<choice doc:name="Choice" doc:id="562368e3-8112-47b3-a559-955bbc20b6f3" >
+			<when expression='#[((not (payload == null)) and sizeOf(payload)==0) or ((not (payload == null)) and ((now()-|P3M|)&gt;=(payload[sizeOf(payload)-1].date as LocalDateTime)))]'>
+				<logger level="INFO" doc:name="Logger" doc:id="633499a9-140e-4ee6-ae16-956087e7b4a4" message='#["Prices not actual"]' />
+				<mongo:remove-documents collectionName="Cryptocurrencies_recent" doc:name="Remove documents" doc:id="b2bb55c2-e196-4d1a-ab7a-2285fcc49f00" config-ref="MongoDB_Config"/>
+				<http:request method="GET" doc:name="Request" doc:id="b471c1ed-002f-48e9-88e5-83bc8029063a" config-ref="HTTP_Request_configuration" path="/coins" >
+					<http:headers ><![CDATA[#[output application/java
+---
+{
+	//"x-rapidapi-key" : "367da360a2mshe99c6313e5c1f4dp121921jsn97b4c767bdf0",
+	//"x-rapidapi-host" : "coinranking1.p.rapidapi.com"
+}]]]></http:headers>
+				</http:request>
+				<ee:transform doc:name="Transform Message" doc:id="99257e29-88b3-4e92-a5f4-c93ae10a5ac3">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+    date: now(),
+    cryptocurrencies: payload.data.coins map(coin)->{
+		symbol: coin.symbol,
+		name: coin.name,
+		price: coin.price
+    }
+}
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<mongo:insert-document collectionName="Cryptocurrencies_recent" doc:name="Insert document" doc:id="aa4ca295-66aa-4036-9939-de5bc46f9fea" config-ref="MongoDB_Config"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="92ed02f4-d38a-49a1-9978-7aecd119895f" message='#["Prices are still actual"]'/>
+			</otherwise>
+		</choice>
+		<mongo:find-documents collectionName="Cryptocurrencies_recent" fields="#[{}]" doc:name="Find documents" doc:id="8224eafa-7c9a-4d2e-969f-6f5e71e42d3d" config-ref="MongoDB_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="d87eeec1-98a9-4376-9d0d-9b2753db84d8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload[sizeOf(payload)-1]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<flow name="mongodbFlow" doc:id="8fa82b00-d170-4a90-9068-3e504224b481" >
+		<http:listener doc:name="Listener" doc:id="eee9fa83-610a-4abe-860f-f2d9128b929e" config-ref="HTTP_Listener_config" path="/viber/get-updates"/>
+		<logger level="INFO" doc:name="Logger" doc:id="60eebebe-0eaa-48b5-ba0a-271529ef818b" message='#["Successful call"]'/>
+		<logger level="INFO" doc:name="Logger" doc:id="6b697e88-f336-4549-aba8-efaf3aeb53be" message='#["Webhook payload: " ++ write(payload, "application/json")]'/>
+		<flow-ref doc:name="Flow Reference" doc:id="057e467d-baa3-4001-88a6-758b392ae3bc" name="get-updates-viber-Sub_Flow" />
+		<ee:transform doc:name="Transform Message" doc:id="93924f25-9ce4-47a1-996f-945ada934c66">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var date1="2022-04-03T09:55:00"
+var date2="2022-04-03T09:52:00"
+---
+{message: "Hello world!"}
+//((date1 as LocalDateTime)-|P3M|)>=(date2 as LocalDateTime)
+//{date:date1 as DateTime{format:"YYYY-MM-dd hh:mm:ss"}}
+//now()// as String{format:"YYYY-MM-dd hh:mm:ss"}
+//"2022-04-03T10:00:00" as LocalDateTime]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

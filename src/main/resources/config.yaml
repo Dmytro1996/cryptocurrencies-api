@@ -1,5 +1,5 @@
 http:
-  port: "8081"
+  port: "5001"
 
 cryptoranking:
   host: api.coinranking.com

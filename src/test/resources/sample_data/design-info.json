@@ -1,5 +1,9 @@
 {
   "sampleData": {
-    "97221bdf-8b65-4ffa-bf79-3150c3037f18": {}
+    "97221bdf-8b65-4ffa-bf79-3150c3037f18": {},
+    "231d1b10-dbd3-47fb-ae8a-9bb1b2eda64a": {
+      "payload": "sample_data/json.json",
+      "vars-messages": "sample_data/list_json.json"
+    }
   }
 }

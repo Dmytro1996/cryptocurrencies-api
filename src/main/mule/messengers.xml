@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/amqp http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd">
+	<flow name="send-to-messagers-implFlow" doc:id="779789f4-1cf9-45a7-95b9-854ab5affa23" >
+		<amqp:listener doc:name="Listener" doc:id="592ea1c2-f72c-4590-ae21-296ed9079a3e" config-ref="AMQP_Config" queueName="cryptocurrencies_viber"/>
+		<ee:transform doc:name="Transform Message" doc:id="81d2beee-6678-48c5-9fbc-9ed1419d3a13" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="rates" ><![CDATA[%dw 2.0
+output text/plain
+import * from dw::core::Arrays
+---
+(payload.cryptocurrencies map(coin)->{
+	rateAsStr: coin.symbol ++ " : " ++ (coin.price as Number as String {format:"#.####"})
+}).*rateAsStr joinBy "\n"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="Send to Viber" doc:id="c4176363-9517-478a-b3fb-6b7ae4c0f1b0" name="send-to-viber-implSub_Flow" />
+	</flow>
+	<sub-flow name="send-to-viber-implSub_Flow" doc:id="f6c0acef-d571-408c-bb22-adeb256cecba" >
+		<http:request method="GET" doc:name="Get subscribers" doc:id="38d3b22e-34df-4730-a14d-770ee8bdecde" config-ref="HTTP_Viber_Request_configuration" path="/get_account_info">
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"X-Viber-Auth-Token" : '${viber_request.token}'
+}]]]></http:headers>
+		</http:request>
+		<foreach doc:name="For Each" doc:id="cd97bff7-8638-4e27-be03-92b41de1b364" collection="#[payload.members]">
+			<http:request method="POST" doc:name="Send message" doc:id="8d36aae5-22f9-49d6-a36d-f74f3f517f41" config-ref="HTTP_Viber_Request_configuration" path="/send_message">
+			<http:body><![CDATA[#[output application/json
+---
+{
+   "receiver": payload.id,
+   "min_api_version":1,
+   "sender":{
+      "name":"Cryptocurrencies-api",
+      "avatar":"https://content1.rozetka.com.ua/goods/images/big/109826427.jpg"
+   },
+   "tracking_data":"tracking data",
+   "type":"text",
+   "text": vars.rates
+}]]]></http:body>
+			<http:headers><![CDATA[#[output application/java
+---
+{
+	"X-Viber-Auth-Token" : '${viber_request.token}'
+}]]]></http:headers>
+		</http:request>
+		</foreach>
+	</sub-flow>
+	<sub-flow name="send-to-telegram-implSub_Flow" doc:id="da6e7687-40f4-4d05-8514-662dd68228ce" >
+		<http:request method="GET" doc:name="getUpdates" doc:id="ecb03ab5-0112-4cbc-8a33-72e3e2360ae5" config-ref="HTTP_Telegram_Request_configuration" path="/getUpdates">
+		</http:request>
+		<ee:transform doc:name="Get unique chat ids" doc:id="1874511c-fa59-4120-9d1d-b404b16e6746">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+(payload.result distinctBy $.message.chat.id map(object)->{
+	chat_id: object.message.chat.id
+}).*chat_id]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="518bfcdb-1dc6-415a-bfa5-9e05a41ac0d0" collection="#[payload]">
+			<http:request method="GET" doc:name="Send message" doc:id="7e10a19f-2461-45cf-aabb-2e320a3e16b0" config-ref="HTTP_Telegram_Request_configuration" path="/sendMessage">
+				<http:query-params><![CDATA[#[{
+	chat_id: payload as Number,
+	text: vars.rates default "Sorry, no coin rates currently" as String,
+	reply_to_message_id: 1
+}]]]></http:query-params>
+			</http:request>
+		</foreach>
+	</sub-flow>
+	<flow name="answear-messeges-telegram-Flow" doc:id="3f91fc07-1237-4937-b4b3-15f892f8f55a" >
+		<scheduler doc:name="Scheduler" doc:id="8f9b5912-abf5-4bc8-b0d7-45414dfc5a70" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="SECONDS" startDelay="3"/>
+			</scheduling-strategy>
+		</scheduler>
+		<os:retrieve doc:name="Retrieve" doc:id="aaee8b77-c983-4025-8bb5-5ca2ff21485f" key="updatesOffset" target="updatesOffset">
+			<os:default-value ><![CDATA[#[output application/json
+---
+0]]]></os:default-value>
+		</os:retrieve>
+		<logger level="INFO" doc:name="Logger" doc:id="914f3b3c-f60a-49c3-aa09-6cc433aefaf5" message='#["updatesOffset: " ++ vars.updatesOffset]'/>
+		<http:request method="GET" doc:name="getUpdates" doc:id="71b9ca2d-5941-42af-b7e7-84c927e54b3b" config-ref="HTTP_Telegram_Request_configuration" path="/getUpdates" >
+			<http:query-params ><![CDATA[#[{
+	offset: vars.updatesOffset
+}]]]></http:query-params>
+		</http:request>
+		<os:store doc:name="Store" doc:id="1679415a-71c6-49fe-83b2-ae9bd73156ea" key="updatesOffset">
+			<os:value ><![CDATA[#[output application/json
+---
+(max(payload.result.*update_id)+1) default (vars.updatesOffset default 0)]]]></os:value>
+		</os:store>
+		<ee:transform doc:name="Transform Message" doc:id="c0dc0069-adb4-41db-8564-8ee944e1c48c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload.result map(object)->{
+	chat_id: object.message.chat.id,
+	message_id: object.message.message_id,
+	message: object.message.text
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Write answears" doc:id="5780af9f-ccb4-40f1-a803-db65cecbfa9e" name="write-answears-Sub_Flow"/>
+		<foreach doc:name="For Each" doc:id="d0742a1d-5422-486e-91eb-2cdc2601aedb" collection="#[payload]" >
+			<http:request method="GET" doc:name="Send message" doc:id="b8bf6529-16d8-4ea2-86cb-7f924b1be2e2" config-ref="HTTP_Telegram_Request_configuration" path="/sendMessage" >
+				<http:query-params ><![CDATA[#[{
+	chat_id: payload.chat_id as Number,
+	text: payload.answear,
+	reply_to_message_id: payload.message_id default 1
+}]]]></http:query-params>
+			</http:request>
+		</foreach>
+	</flow>
+	<sub-flow name="write-answears-Sub_Flow" doc:id="0be3813b-8666-4e46-8fd3-8d5f1725215b" >
+		<set-variable value="#[payload]" doc:name="Set mesages" doc:id="1f67cf3a-2f89-45af-bbe2-1c94ffc3fff7" variableName="messages"/>
+		<logger level="INFO" doc:name="Logger" doc:id="098709b0-4c49-4676-b4cc-ad425d890bf4" message='#["Size of updates: " ++ sizeOf(payload)]'/>
+		<choice doc:name="Choice" doc:id="b1193d01-a300-4284-be70-e5ac9ba36b59" >
+			<when expression="#[(not (payload == null)) and sizeOf(payload)&gt;0]">
+				<flow-ref doc:name="Get recent coin prices" doc:id="7b34b5c0-ac69-409f-a9b8-7819161ba0c7" name="get-recent-coin-prices-Sub_Flow"/>
+				<logger level="INFO" doc:name="Logger" doc:id="c1a3fea0-1b21-4f0c-b73e-40b7131089d4" message='#[output text/plain&#10;fun formAnswear(message)=payload.cryptocurrencies.*name&#10;---&#10;"Payload before forming answear: " ++ write(payload.cryptocurrencies.*name,"application/json") ++ " Payload.*name from function: " ++ write(formAnswear("123"),"application/json")]'/>
+				<ee:transform doc:name="Transform Message" doc:id="231d1b10-dbd3-47fb-ae8a-9bb1b2eda64a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var greeting="Hello!Welcome to our bot! Here you can find information about prices of most popular cryptocurrencies. Call a command to get most recent prices, type coin name or symbol or simply wait for daily prices info."
+fun formAnswear(message)=if(message=="/get_coins")
+     (payload.cryptocurrencies map(coin)->{
+	     rateAsStr: coin.symbol ++ " : " ++ (coin.price as Number as String {format:"#.####"})
+     }).*rateAsStr joinBy "\n" 
+  else if(message=="/start")
+    greeting
+  else if((payload.cryptocurrencies.*name contains message) or (payload.cryptocurrencies.*symbol contains message))
+    (payload.cryptocurrencies filter($.name==message or $.symbol==message))[0].symbol ++ ":" ++ (payload.cryptocurrencies filter($.name==message or $.symbol==message))[0].price
+  else
+    "Sorry, no such coin"
+---
+vars.messages map(message)->{
+	chat_id: message.chat_id,
+	message_id: message.message_id,
+	answear: formAnswear(message.message)
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+		</choice>
+	</sub-flow>
+	<sub-flow name="get-updates-viber-Sub_Flow" doc:id="df6faec0-9978-4c87-a4a0-8688959c9641" >
+		<ee:transform doc:name="Transform Message" doc:id="629177e5-1e6f-49ec-b53c-b5f75c3c0c1a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if(payload.event=="subscribed" or payload.event=="conversation_started")
+  [{
+  	chat_id: payload.sender.id,
+	message_id: 1,
+	message: "/start"
+  }]
+else if(payload.event=="message")
+  [{
+  	chat_id: payload.sender.id,
+	message_id: 1,
+	message: if(payload.message.text=="get_coins") "/get_coins" else payload.message.text
+  }]
+else
+  []]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="000668e3-4f31-4e82-bcdd-342bb119a732" name="write-answears-Sub_Flow"/>
+		<http:request method="POST" doc:name="Send message" doc:id="f109c5a9-b2f9-4831-aa30-93fafbe47e81" config-ref="HTTP_Viber_Request_configuration" path="/send_message" >
+			<http:body ><![CDATA[#[output application/json
+---
+{
+   "receiver": payload[0].chat_id,
+   "min_api_version":1,
+   "sender":{
+      "name":"Cryptocurrencies-api",
+      "avatar":"https://content1.rozetka.com.ua/goods/images/big/109826427.jpg"
+   },
+   "tracking_data":"tracking data",
+   "type":"text",
+   "text": payload[0].answear
+}]]]></http:body>
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"X-Viber-Auth-Token" : '${viber_request.token}'
+}]]]></http:headers>
+		</http:request>
+	</sub-flow>
+
+</mule>

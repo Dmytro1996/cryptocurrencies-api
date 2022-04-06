@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_df6faec0_9978_4c87_a4a0_8688959c9641_Output_Variables_messages = Any
+

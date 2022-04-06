@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_13fc3d64_47a8_4da3_9d7e_a1c840ae41b7_Output_Payload = Array<Binary>
+
