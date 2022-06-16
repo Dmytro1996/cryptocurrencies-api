@@ -12,7 +12,15 @@ amqp:
   port: "5672"
   username: "Dmytro"
   password: "![q8lREinYj9AQON6OZfw3Yg==]"
-  
+  tls:
+    port: "5671"
+    truststore:
+      path: "truststore_dir"
+      passphrase: "truststore_passphrase"
+    keystore:
+      path: "keystore_dir"
+      passphrase: "keystore_passphrase"
+        
 mongodb:
   database: "cryptocurrencies_task"
   
